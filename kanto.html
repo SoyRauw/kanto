@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campeón de Kanto - Team Tracker</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --pk-red: #ef5350;
+            --pk-blue: #3862bc;
+            --pk-yellow: #ffcb05;
+            --pk-dark: #2a2a2a;
+            --ui-bg: #f8f9fa;
+            --ui-border: #444;
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'VT323', monospace;
+            background-color: var(--pk-red);
+            /* Patrón de Pokeballs de fondo */
+            background-image: 
+                radial-gradient(circle at 50% 50%, #fff 10%, transparent 10%),
+                radial-gradient(circle at 50% 50%, #333 15%, transparent 15%),
+                linear-gradient(0deg, rgba(255,255,255,0.1) 50%, transparent 50%);
+            background-size: 50px 50px;
+            animation: scrollBg 20s linear infinite;
+            overflow-x: hidden;
+            color: var(--pk-dark);
+        }
+
+        @keyframes scrollBg {
+            from { background-position: 0 0; }
+            to { background-position: 50px 50px; }
+        }
+
+        /* --- Título Principal --- */
+        header {
+            text-align: center;
+            padding: 40px 20px;
+            background: linear-gradient(180deg, #ff0000 0%, #cc0000 100%);
+            border-bottom: 8px solid #000;
+            box-shadow: 0 10px 0 rgba(0,0,0,0.2);
+            position: relative;
+            z-index: 10;
+        }
+
+        h1 {
+            font-family: 'Press Start 2P', cursive;
+            color: #ffcb05;
+            text-shadow: 4px 4px 0 #2a3eb1;
+            font-size: 2rem;
+            line-height: 1.5;
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .subtitle {
+            color: #fff;
+            font-size: 1.5rem;
+            margin-top: 10px;
+            text-shadow: 2px 2px 0 #000;
+        }
+
+        /* --- Contenedor del Equipo --- */
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 30px;
+            padding: 40px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* --- Tarjeta Estilo Pokédex --- */
+        .poke-card {
+            background: #f0f0f0;
+            border: 4px solid var(--pk-dark);
+            border-radius: 15px;
+            padding: 5px;
+            position: relative;
+            box-shadow: 8px 8px 0 rgba(0,0,0,0.3);
+            transition: transform 0.2s;
+            overflow: hidden;
+        }
+
+        .poke-card:hover {
+            transform: translateY(-5px);
+        }
+
+        /* Header de la tarjeta (Nombre + Nivel) */
+        .card-header {
+            background: var(--pk-dark);
+            color: white;
+            padding: 8px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 8px 8px 0 0;
+            font-family: 'Press Start 2P';
+            font-size: 0.7rem;
+        }
+
+        /* Área del Sprite */
+        .sprite-area {
+            background: #fff;
+            height: 160px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-bottom: 4px solid var(--pk-dark);
+            position: relative;
+            background-image: radial-gradient(#e0e0e0 15%, transparent 16%), radial-gradient(#e0e0e0 15%, transparent 16%);
+            background-size: 20px 20px;
+            background-position: 0 0, 10px 10px;
+        }
+
+        .sprite-area img {
+            width: 96px;
+            height: 96px;
+            object-fit: contain;
+            transform: scale(1.5);
+            image-rendering: pixelated; /* Clave para el look retro */
+            filter: drop-shadow(4px 4px 0 rgba(0,0,0,0.2));
+            animation: idle 2s infinite ease-in-out;
+        }
+
+        @keyframes idle {
+            0%, 100% { transform: scale(1.5) translateY(0); }
+            50% { transform: scale(1.5) translateY(-5px); }
+        }
+
+        /* Info Container */
+        .info-container {
+            padding: 15px;
+        }
+
+        /* Tipos */
+        .types {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            justify-content: center;
+        }
+
+        .type-badge {
+            padding: 4px 12px;
+            border-radius: 4px;
+            color: white;
+            font-family: 'Press Start 2P';
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            border: 2px solid rgba(0,0,0,0.2);
+            text-shadow: 1px 1px 0 rgba(0,0,0,0.5);
+        }
+
+        /* Stats Box */
+        .stats-box {
+            background: #dcdcdc;
+            border: 2px solid #999;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            border-bottom: 1px dashed #999;
+        }
+
+        .stat-label { color: #555; }
+        .stat-val { color: #000; font-weight: bold; }
+
+        /* Moveset - Estilo Botones de Batalla */
+        .moveset {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .move {
+            background: #fff;
+            border: 2px solid #333;
+            border-radius: 8px;
+            padding: 5px;
+            text-align: center;
+            font-size: 1.1rem;
+            cursor: pointer;
+            position: relative;
+            box-shadow: 0 4px 0 #ccc;
+            transition: all 0.1s;
+        }
+
+        .move:active {
+            transform: translateY(4px);
+            box-shadow: 0 0 0 #ccc;
+        }
+
+        .move::before {
+            content: '▶';
+            position: absolute;
+            left: 5px;
+            opacity: 0;
+            color: var(--pk-red);
+        }
+
+        .move:hover {
+            background: #fff8e1;
+            border-color: var(--pk-red);
+        }
+        
+        .move:hover::before { opacity: 1; }
+
+        /* Colores de Tipos Oficiales */
+        .t-steel { background: #B7B7CE; }
+        .t-dragon { background: #6F35FC; }
+        .t-fire { background: #EE8130; }
+        .t-electric { background: #F7D02C; color: black; text-shadow: none; }
+        .t-fighting { background: #C22E28; }
+        .t-psychic { background: #F95587; }
+        .t-ghost { background: #735797; }
+        .t-poison { background: #A33EA1; }
+        .t-water { background: #6390F0; }
+        .t-dark { background: #705746; }
+
+        /* Animación de entrada */
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .poke-card {
+            animation: slideIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            opacity: 0;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: white;
+            font-family: 'Press Start 2P';
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Liga Pokémon<br>Kanto</h1>
+        <div class="subtitle">Equipo Aspirante</div>
+    </header>
+
+    <div class="grid-container">
+
+        <div class="poke-card" style="animation-delay: 0.1s">
+            <div class="card-header">
+                <span>GOODRA-H</span>
+                <span>Lv.50</span>
+            </div>
+            <div class="sprite-area">
+                <img src="https://play.pokemonshowdown.com/sprites/gen5ani/goodra-hisui.gif" alt="Goodra">
+            </div>
+            <div class="info-container">
+                <div class="types">
+                    <span class="type-badge t-steel">Acero</span>
+                    <span class="type-badge t-dragon">Dragón</span>
+                </div>
+                <div class="stats-box">
+                    <div class="stat-row"><span class="stat-label">Obj:</span> <span class="stat-val">Chaleco Asalto</span></div>
+                    <div class="stat-row"><span class="stat-label">Nat:</span> <span class="stat-val">Modesta</span></div>
+                    <div class="stat-row"><span class="stat-label">Hab:</span> <span class="stat-val">Caparazón</span></div>
+                </div>
+                <div class="moveset">
+                    <div class="move">Pulso Dragón</div>
+                    <div class="move">Foco Resplandor</div>
+                    <div class="move">Lanzallamas</div>
+                    <div class="move">Hidrobomba</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="poke-card" style="animation-delay: 0.2s">
+            <div class="card-header">
+                <span>ARCANINE</span>
+                <span>Lv.43</span>
+            </div>
+            <div class="sprite-area">
+                <img src="https://play.pokemonshowdown.com/sprites/gen5ani/arcanine.gif" alt="Arcanine">
+            </div>
+            <div class="info-container">
+                <div class="types">
+                    <span class="type-badge t-fire">Fuego</span>
+                </div>
+                <div class="stats-box">
+                    <div class="stat-row"><span class="stat-label">Obj:</span> <span class="stat-val">Cinta Elegida</span></div>
+                    <div class="stat-row"><span class="stat-label">Nat:</span> <span class="stat-val">Firme</span></div>
+                    <div class="stat-row"><span class="stat-label">Hab:</span> <span class="stat-val">Intimidación</span></div>
+                </div>
+                <div class="moveset">
+                    <div class="move">Envite Ígneo</div>
+                    <div class="move">Voltio Cruel</div>
+                    <div class="move">Vel. Extrema</div>
+                    <div class="move">A Bocajarro</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="poke-card" style="animation-delay: 0.3s">
+    <div class="card-header">
+        <span>PIKACHU-ROCK</span>
+        <span>Lv.43</span>
+    </div>
+    <div class="sprite-area">
+        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/10080.png" 
+             alt="Pikachu Rock Star"
+             onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/10080.png'">
+        
+        <div class="sparkles"></div>
+    </div>
+    <div class="info-container">
+        <div class="types">
+            <span class="type-badge t-electric">Eléctrico</span>
+            <span class="type-badge t-steel">Acero</span> </div>
+        <div class="stats-box">
+            <div class="stat-row"><span class="stat-label">Obj:</span> <span class="stat-val">Bolaguardia</span></div>
+            <div class="stat-row"><span class="stat-label">Nat:</span> <span class="stat-val">Alegre</span></div>
+            <div class="stat-row"><span class="stat-label">Hab:</span> <span class="stat-val">Pararrayos</span></div>
+        </div>
+        <div class="moveset">
+            <div class="move">Puño Meteoro</div>
+            <div class="move">Placaje Eléc</div>
+            <div class="move">Sorpresa</div>
+            <div class="move">Voltio Cruel</div>
+        </div>
+    </div>
+</div>
+
+        <div class="poke-card" style="animation-delay: 0.4s">
+            <div class="card-header">
+                <span>GALLADE</span>
+                <span>Lv.41</span>
+            </div>
+            <div class="sprite-area">
+                <img src="https://play.pokemonshowdown.com/sprites/gen5ani/gallade.gif" alt="Gallade">
+            </div>
+            <div class="info-container">
+                <div class="types">
+                    <span class="type-badge t-psychic">Psíquico</span>
+                    <span class="type-badge t-fighting">Lucha</span>
+                </div>
+                <div class="stats-box">
+                    <div class="stat-row"><span class="stat-label">Obj:</span> <span class="stat-val">Vidaesfera</span></div>
+                    <div class="stat-row"><span class="stat-label">Nat:</span> <span class="stat-val">Alegre</span></div>
+                    <div class="stat-row"><span class="stat-label">Hab:</span> <span class="stat-val">Agudeza</span></div>
+                </div>
+                <div class="moveset">
+                    <div class="move">Psicocorte</div>
+                    <div class="move">Espada Santa</div>
+                    <div class="move">Tajo Umbrío</div>
+                    <div class="move">Hoja Aguda</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="poke-card" style="animation-delay: 0.5s">
+            <div class="card-header">
+                <span>YANFRI</span>
+                <span>Lv.40</span>
+            </div>
+            <div class="sprite-area">
+                <img src="https://play.pokemonshowdown.com/sprites/gen5ani/gengar.gif" alt="Yanfri">
+            </div>
+            <div class="info-container">
+                <div class="types">
+                    <span class="type-badge t-ghost">Fantasma</span>
+                    <span class="type-badge t-poison">Veneno</span>
+                </div>
+                <div class="stats-box">
+                    <div class="stat-row"><span class="stat-label">Obj:</span> <span class="stat-val">Banda Focus</span></div>
+                    <div class="stat-row"><span class="stat-label">Nat:</span> <span class="stat-val">Miedosa</span></div>
+                    <div class="stat-row"><span class="stat-label">Hab:</span> <span class="stat-val">Cuerpo Maldito</span></div>
+                </div>
+                <div class="moveset">
+                    <div class="move">Bola Sombra</div>
+                    <div class="move">Bomba Lodo</div>
+                    <div class="move">Brillo Mágico</div>
+                    <div class="move">Mismo Destino</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="poke-card" style="animation-delay: 0.6s">
+            <div class="card-header">
+                <span>GRENINJA</span>
+                <span>Lv.42</span>
+            </div>
+            <div class="sprite-area">
+                <img src="https://play.pokemonshowdown.com/sprites/gen5ani/greninja.gif" alt="Greninja">
+            </div>
+            <div class="info-container">
+                <div class="types">
+                    <span class="type-badge t-water">Agua</span>
+                    <span class="type-badge t-dark">Siniestro</span>
+                </div>
+                <div class="stats-box">
+                    <div class="stat-row"><span class="stat-label">Obj:</span> <span class="stat-val">Gafas Elección</span></div>
+                    <div class="stat-row"><span class="stat-label">Nat:</span> <span class="stat-val">Miedosa</span></div>
+                    <div class="stat-row"><span class="stat-label">Hab:</span> <span class="stat-val">Mutatipo</span></div>
+                </div>
+                <div class="moveset">
+                    <div class="move">Surfear</div>
+                    <div class="move">Pulso Umbrío</div>
+                    <div class="move">Rayo Hielo</div>
+                    <div class="move">Paranormal</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <footer>
+        © 2024 Radical Red Trainer ID: 59aa7e
+    </footer>
+
+</body>
+</html>
